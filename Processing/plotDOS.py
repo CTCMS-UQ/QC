@@ -20,7 +20,8 @@ plt.rc('font', **font)
 
 #import sys
 
-file_location = 'C:/Users/uqhhoh/OneDrive - The University of Queensland/Desktop'
+#file_location = 'C:/Users/uqhhoh/OneDrive - The University of Queensland/Desktop'
+file_location = "./"
 doscar = file_location + '/DOSCAR'
 output = file_location + '/output.txt'
 #ion_number = sys.argv[1]

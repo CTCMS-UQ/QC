@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import numpy as np
 import argparse
+import linecache
 
 class Units:
     """ Bag of data containing units and parameters for the simulation system.
@@ -19,16 +20,21 @@ class Units:
         self.__dict__ = self._params
 
 class DOS:
+    """Top-level class for reading input and manipulating density of states data. Can be overridden to 
+    parse different file formats."""
     def __init__(self, infile, debug = False):
         # Read the data file into a set of three numpy arrays. We need to pass "unpack = True" so that
         # the data comes out in the right order for the comma operator unpacking
-        self.E, self.up, self.down = np.loadtxt(infile, unpack=True)
+        self.read_input(infile)
 
         # Now sum the absolute values of the DOS terms to get the total density of states
         self.TDOS = abs(self.up) + abs(self.down)
 
         # Keep track of whether to print debugging output
         self.debug = debug
+    
+    def read_input(self, infile):
+        self.E, self.up, self.down = np.loadtxt(infile, unpack=True)
 
     def print_QC(self, phi_min, phi_max, num_points = 100):
         """ Print the Quantum capacitance for external potentials in the range [phi_min, phi_max].
@@ -101,6 +107,36 @@ class DOS:
 
         print(f"{phi}     {integral}     {integral_mF_per_cm2}     {integral_F_per_gram}")
 
+class DOSCAR(DOS):
+    def read_input(self, infile):
+        # Read straight from the VASP output format (DOSCAR)
+        # Get info about the number of states and Fermi level
+        energy_params = linecache.getline(infile,6).split()
+        num_states = int(energy_params[2])
+        E_fermi = float(energy_params[3])
+
+        self.E = np.zeros(num_states)
+        self.up = np.zeros(num_states)
+        self.down = np.zeros(num_states)
+
+        # Loop through the NEDOS lines describing the ion
+        # DOSCAR contains 7 lines before the total DOS is plotted
+        for line in range(7,7+num_states):
+            # E_index starts counting at 0 wherever we are in the file
+            E_index = line - 7
+            # Break the line up into spin-orbital components
+            data = linecache.getline(infile,line).split()
+
+            # Set zero of energy scale at the Fermi level by subtracting
+            # Ef from each point
+            self.E[E_index] = (float(data[0])) - E_fermi
+
+            # Get total DOS at each energy
+            DOSup = float(data[1])        
+            self.up[E_index] = DOSup
+
+            DOSdown = float(data[2])        
+            self.down[E_index] = DOSdown
 ######################################################################################################
 if __name__ == "__main__":
 
@@ -143,6 +179,6 @@ quantum capacitance in various units")
     phi_max = args.phi
 
     # First, read in the data file as numpy arrays
-    data = DOS(args.datafile, debug=args.debug)
+    data = DOSCAR(args.datafile, debug=args.debug)
     data.print_QC(phi_min, phi_max, args.num_points)
     
