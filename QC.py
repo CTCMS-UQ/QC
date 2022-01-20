@@ -14,7 +14,7 @@ class Units:
     # These are constants of the universe and can never change
     kb_eV = 8.617333262e-5 # Boltzmann's constant
     e_charge = 1.602176634e-19 # Elementary charge
-    mF_per_cm2_constant = 6.241418e40 # Constant to convert default units to mF/cm^-2
+    uF_per_cm2_constant = 6.241418e40 # Constant to convert default units to mF/cm^-2
     F_per_gram_constant = 3.75867e42 # Constant to convert default units to F/g
     def __init__(self):
         self.__dict__ = self._params
@@ -47,7 +47,7 @@ class DOS:
         units = Units()
         # Print calculation parameters and header
         print(f"#T = {units.T:.3f} K, area = {units.S:.3f} Angstrom^2, mass = {units.M:.3f} amu")
-        print("#Phi(eV)    QC(C^2 eV^-1 cell^-1)    QC(mF cm^-2)     QC(F g^-1)")
+        print("#Phi(eV)    QC(C^2 eV^-1 cell^-1)    QC(μF cm^-2)     QC(F g^-1)")
 
         # Make the array of potentials
         phispace = np.linspace(phi_min, phi_max, num_points)
@@ -101,7 +101,7 @@ class DOS:
         integral *= units.e_charge**2/(4*units.kbT)
 
         # Now get the value of the integral in mF cm^-2
-        integral_mF_per_cm2 = integral * units.mF_per_cm2_constant/units.S
+        integral_mF_per_cm2 = integral * units.uF_per_cm2_constant/units.S
         # And in F/g
         integral_F_per_gram = integral * units.F_per_gram_constant/units.M
 
