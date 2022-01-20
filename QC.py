@@ -47,7 +47,7 @@ class DOS:
         units = Units()
         # Print calculation parameters and header
         print(f"#T = {units.T:.3f} K, area = {units.S:.3f} Angstrom^2, mass = {units.M:.3f} amu")
-        print("#Phi(eV)    QC(C^2 eV^-1 cell^-1)    QC(μF cm^-2)     QC(F g^-1)")
+        print("#Phi(eV)    QC(C^2 eV^-1 cell^-1)    QC(micro-F cm^-2)     QC(F g^-1)")
 
         # Make the array of potentials
         phispace = np.linspace(phi_min, phi_max, num_points)
